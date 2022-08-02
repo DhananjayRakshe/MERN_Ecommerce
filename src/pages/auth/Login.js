@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { auth, googleAuthProvider } from "../../firebase";
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css'
@@ -7,12 +7,19 @@ import {
   GoogleOutlined,
   MailOutlined
 } from "@ant-design/icons";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const Login = ({ history }) => {
   const [email, setEmail] = useState("dhananjayrakshe77@gmail.com");
   const [password, setPassword] = useState("123456");
   const [loading, setLoading] = useState(false);
+
+  const { user } = useSelector((state) => ({ ...state }))
+
+  useEffect(() => {
+    if (user && user.token) history.push('/');
+  }, [user])
 
   let dispatch = useDispatch();
 
@@ -20,10 +27,11 @@ const Login = ({ history }) => {
     e.preventDefault();
     setLoading(true);
     // console.table(email, password);
-    const result = await auth.signInWithEmailAndPassword(email, password);
+
 
     try {
-      // console.log(result);
+      const result = await auth.signInWithEmailAndPassword(email, password);
+      // console.log(result); 
       const { user } = result;
       const idTokenResult = await user.getIdTokenResult()
 
@@ -42,25 +50,25 @@ const Login = ({ history }) => {
     }
   };
 
-  const googleLogin = async() => {
+  const googleLogin = async () => {
     auth.signInWithPopup(googleAuthProvider)
-    .then(async (result) => {
-      const {user} = result;
-      const idTokenResult = await user.getIdTokenResult();
+      .then(async (result) => {
+        const { user } = result;
+        const idTokenResult = await user.getIdTokenResult();
 
-      dispatch({
-        type: 'LOGGED_IN_USER',
-        payload: {
-          email: user.email,
-          token: idTokenResult.token,
-        },
-      });
-      history.push("/");
-    })
-    .catch((err) => {
-      console.log(err);
-      toast.error(err.message);
-    })
+        dispatch({
+          type: 'LOGGED_IN_USER',
+          payload: {
+            email: user.email,
+            token: idTokenResult.token,
+          },
+        });
+        history.push("/");
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error(err.message);
+      })
   };
 
   const loginForm = () => (
@@ -106,7 +114,7 @@ const Login = ({ history }) => {
     <div className="container p-5">
       <div className="row">
         <div className="col-md-6 offset-md-3">
-          {loading ? <h4 className="text-danger">Loading...</h4> :  <h4>Login</h4>}
+          {loading ? <h4 className="text-danger">Loading...</h4> : <h4>Login</h4>}
           {loginForm()}
 
           <Button
@@ -120,6 +128,8 @@ const Login = ({ history }) => {
           >
             Login with Google
           </Button>
+
+          <Link to="/forgot/password" className="float-right text-danger">Forgot Password?</Link>
         </div>
       </div>
     </div>
