@@ -23,7 +23,7 @@ useEffect(() => {
   const unsubscribe = firebase.auth().onAuthStateChanged( async (user) => {
     if(user) {
       const idTokenResult = await user.getIdTokenResult();
-      console.log("user", user);
+      // console.log("user", user);
 
       dispatch({
         type: 'LOGGED_IN_USER',
